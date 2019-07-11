@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 import sympy as sym
 import math
 
@@ -27,53 +28,77 @@ n = 200
 x = 3 * (np.random.rand(n, 4) - 0.5)
 x = np.hstack([x, np.ones((n, 1))])
 dim = 5
-y = (2 * x[:, 0].reshape((n,1)) - 1 * x[:, 1].reshape((n,1)) + 0.5 + 0.5 * np.random.randn(n, 1)) > 0
+y = (2 * x[:, 0].reshape((n, 1)) - 1 * x[:, 1].reshape((n, 1)) + 0.5 + 0.5 * np.random.randn(n, 1)) > 0
 y = 2 * y - 1
-win = np.ones((dim,1))
-lamin = 0.01
-I5 = np.eye(5)
+lam = 2
+alpha = 0.01
+
+#--- steepest gradient method ---
+w = np.ones((dim, 1))
 step = 0
-print(win)
-# --- steepest gradient method ---
-# while 1:
-#     deltaj = 2 * lamin * win
-#     for i in range(n):
-#         Cin = 0
-#         Xin = -y[i]*x[i].reshape(4,1)
-#         #print(Xin)
-#         for j in range(4):
-#             Cin -= win[j] * x[i][j] * y[i].reshape(1, 1)
-#         deltaj += (math.exp(Cin))/(1 + math.exp(Cin))*Xin
-#     win -= deltaj *lamin
-#     #print(np.linalg.norm(deltaj))
-#     if np.linalg.norm(deltaj) < 0.01:
-#         print(deltaj)
-#         break
-#     #print(win)
-# print(win)
+arr_sgm = []
+while 1:
+    grad = 2 * lam * w
+    obj_fun = lam * np.dot(w.T, w)
+    for i in range(n):
+        xi = x[i].reshape(dim, 1)
+        yi = y[i].reshape(1, 1)
+        Xin = -y[i]*x[i].reshape(dim, 1)
+        exp = np.exp(-yi * np.dot(w.T, xi))
+        grad += -exp/(1 + exp)*xi*yi
+        obj_fun += np.log(1 + exp)
+    w -= grad * alpha
+    arr_sgm.append(np.asscalar(obj_fun))
+    step += 1
+    if np.linalg.norm(grad) < 0.001:
+        #print(grad)
+        break
+print("--- steepest gradient method ---")
+print("step:")
+print(step)
+print(w)
 
 # --- newton method ---
+w = np.ones((dim, 1))
+step = 0
+arr_newton = []
 while 1:
-    grad = 2 * lamin * win
-    hessian = 2 * lamin * np.eye(5)
+    grad = 2 * lam * w
+    hessian = 2 * lam * np.eye(5)
+    obj_fun = lam * np.dot(w.T, w)
     for i in range(n):
-        xi = x[i].reshape(dim,1)
-        yi = y[i].reshape(1,1)
-        exp = np.exp(-yi * np.dot(win.T, xi))
+        xi = x[i].reshape(dim, 1)
+        yi = y[i].reshape(1, 1)
+        exp = np.exp(-yi * np.dot(w.T, xi))
         pi = 1/(1+exp)
         grad += -exp/(1 + exp)*xi*yi
         hessian += pi*(1-pi)*np.dot(xi, xi.T) * yi**2
+        obj_fun += np.log(1 + exp)
     d = -np.dot(np.linalg.inv(hessian), grad)
-    win = win + d
+    w = w + d
+    arr_newton.append(np.asscalar(obj_fun))
     step += 1
-    if np.linalg.norm(d) < 0.01:
+    if np.linalg.norm(d) < 0.001:
         print(grad)
         break
+print("--- newton method ---")
+print("step:")
 print(step)
-print(win)
+print(w)
 
+print(arr_sgm)
+print(arr_newton)
 
-
+print("--- compare ---")
+tmp1 = arr_sgm[len(arr_sgm)-1]
+arr_sgm -= tmp1*np.ones((len(arr_sgm)))
+plt.plot(np.arange(0, len(arr_sgm), 1), arr_sgm)
+tmp2 = arr_newton[len(arr_newton)-1]
+arr_newton -= tmp2*np.ones((len(arr_newton)))
+plt.plot(np.arange(0, len(arr_newton), 1), arr_newton)
+#print(arr_sgm)
+#plt.plot(np.arange(0, len(arr_newton), 1), arr_newton)
+plt.show()
 
 
 #for k in range(1):
