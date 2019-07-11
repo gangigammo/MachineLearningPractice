@@ -25,12 +25,13 @@ import math
 #parameter
 n = 200
 x = 3 * (np.random.rand(n, 4) - 0.5)
-
+x = np.hstack([x, np.ones((n, 1))])
+dim = 5
 y = (2 * x[:, 0].reshape((n,1)) - 1 * x[:, 1].reshape((n,1)) + 0.5 + 0.5 * np.random.randn(n, 1)) > 0
 y = 2 * y - 1
-win = np.ones((4,1))
+win = np.ones((dim,1))
 lamin = 0.01
-I4 = np.eye(4)
+I5 = np.eye(5)
 step = 0
 print(win)
 # --- steepest gradient method ---
@@ -54,9 +55,9 @@ print(win)
 # --- newton method ---
 while 1:
     grad = 2 * lamin * win
-    hessian = 2 * lamin * I4
+    hessian = 2 * lamin * np.eye(5)
     for i in range(n):
-        xi = x[i].reshape(4,1)
+        xi = x[i].reshape(dim,1)
         yi = y[i].reshape(1,1)
         exp = np.exp(-yi * np.dot(win.T, xi))
         pi = 1/(1+exp)
