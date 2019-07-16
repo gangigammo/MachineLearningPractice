@@ -34,6 +34,7 @@ lam = 2
 alpha = 0.01
 
 #--- steepest gradient method ---
+print("--- steepest gradient method ---")
 w = np.ones((dim, 1))
 step = 0
 arr_sgm = []
@@ -53,12 +54,12 @@ while 1:
     if np.linalg.norm(grad) < 0.001:
         #print(grad)
         break
-print("--- steepest gradient method ---")
-print("step:")
+print("step:",end="")
 print(step)
 print(w)
 
 # --- newton method ---
+print("--- newton method ---")
 w = np.ones((dim, 1))
 step = 0
 arr_newton = []
@@ -79,10 +80,9 @@ while 1:
     arr_newton.append(np.asscalar(obj_fun))
     step += 1
     if np.linalg.norm(d) < 0.001:
-        print(grad)
+        #print(grad)
         break
-print("--- newton method ---")
-print("step:")
+print("step:",end="")
 print(step)
 print(w)
 
@@ -99,6 +99,12 @@ plt.plot(np.arange(0, len(arr_newton), 1), arr_newton)
 #print(arr_sgm)
 #plt.plot(np.arange(0, len(arr_newton), 1), arr_newton)
 plt.show()
+
+x = 3 * (np.random.rand(n, 4) - 0.5)
+W = np.array([[2, -1, 0.5], [-3,  2,   1], [1,  2, 3]])
+
+x_with_error = np.dot(np.hstack([x[:, 0:2].reshape((n, 2)), np.ones((n, 1))]), W.T) + 0.5 * np.random.randn(n, 3)
+maxlogit, y = x_with_error.max(axis=1), x_with_error.argmax(axis=1)
 
 
 #for k in range(1):
