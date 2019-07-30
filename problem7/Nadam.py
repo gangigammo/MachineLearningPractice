@@ -1,14 +1,10 @@
 # requirement
-import numpy as np
-import matplotlib.pyplot as plt
-import cvxpy as cv
 # proximal gradient
 
 # requirement
 import numpy as np
-import matplotlib.pyplot as plt
-import cvxpy as cv
-import st_func
+from problem7 import st_func
+
 
 def opt():
     A = np.array([[250, 15],
@@ -23,7 +19,6 @@ def opt():
 
     x_history = []
     fvalues = []
-    g_history = []
     m_t = np.zeros((2, 1))
     v_t = np.zeros((2, 1))
     mu_p = 0.5
@@ -64,4 +59,9 @@ def opt():
 
     x_history = np.vstack(x_history)
     fvalues = np.vstack(fvalues)
+
+    fvalues = fvalues.flatten()
+    fvalues -= fvalues[len(fvalues) - 1]
+    fvalues = np.delete(fvalues, len(fvalues) - 1)
+
     return fvalues

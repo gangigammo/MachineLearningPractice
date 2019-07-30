@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 import sympy as sym
 import math
 
@@ -31,7 +32,8 @@ dim = 5
 y = (2 * x[:, 0].reshape((n, 1)) - 1 * x[:, 1].reshape((n, 1)) + 0.5 + 0.5 * np.random.randn(n, 1)) > 0
 y = 2 * y - 1
 lam = 2
-alpha = 0.01
+alpha = 0.04
+aim = 1e-6
 
 #--- steepest gradient method ---
 print("--- steepest gradient method ---")
@@ -51,7 +53,7 @@ while 1:
     w -= grad * alpha
     arr_sgm.append(np.asscalar(obj_fun))
     step += 1
-    if np.linalg.norm(grad) < 0.001:
+    if np.linalg.norm(grad) < aim:
         #print(grad)
         break
 print("step:",end="")
@@ -79,32 +81,46 @@ while 1:
     w = w + d
     arr_newton.append(np.asscalar(obj_fun))
     step += 1
-    if np.linalg.norm(d) < 0.001:
+    if np.linalg.norm(d) < aim:
         #print(grad)
         break
 print("step:",end="")
 print(step)
 print(w)
 
-print(arr_sgm)
-print(arr_newton)
+# print(arr_sgm)
+# print(arr_newton)
 
 print("--- compare ---")
+plt.yscale('log')
+plt.xlabel('step')
+plt.ylabel('diff')
 tmp1 = arr_sgm[len(arr_sgm)-1]
 arr_sgm -= tmp1*np.ones((len(arr_sgm)))
-plt.plot(np.arange(0, len(arr_sgm), 1), arr_sgm)
+arr_sgm = np.delete(arr_sgm,len(arr_sgm)-1)
+plt.plot(np.arange(0, len(arr_sgm), 1), arr_sgm,marker="o",markersize=1,linewidth=0.7,label="steepest gradient")
+
 tmp2 = arr_newton[len(arr_newton)-1]
 arr_newton -= tmp2*np.ones((len(arr_newton)))
-plt.plot(np.arange(0, len(arr_newton), 1), arr_newton)
+arr_newton = np.delete(arr_newton,len(arr_newton)-1)
+plt.plot(np.arange(0, len(arr_newton), 1), arr_newton,marker="o",markersize=1,linewidth=0.7,label="newton")
 #print(arr_sgm)
 #plt.plot(np.arange(0, len(arr_newton), 1), arr_newton)
+print(arr_sgm)
+print(arr_newton)
+plt.xlim(0, 25)
+plt.legend()
+dirname = "figures/"
+os.makedirs(dirname, exist_ok=True)
+filename = dirname + "binary_classification.pdf"
+plt.savefig(filename)
 plt.show()
 
-x = 3 * (np.random.rand(n, 4) - 0.5)
-W = np.array([[2, -1, 0.5], [-3,  2,   1], [1,  2, 3]])
-
-x_with_error = np.dot(np.hstack([x[:, 0:2].reshape((n, 2)), np.ones((n, 1))]), W.T) + 0.5 * np.random.randn(n, 3)
-maxlogit, y = x_with_error.max(axis=1), x_with_error.argmax(axis=1)
+# x = 3 * (np.random.rand(n, 4) - 0.5)
+# W = np.array([[2, -1, 0.5], [-3,  2,   1], [1,  2, 3]])
+#
+# x_with_error = np.dot(np.hstack([x[:, 0:2].reshape((n, 2)), np.ones((n, 1))]), W.T) + 0.5 * np.random.randn(n, 3)
+# maxlogit, y = x_with_error.max(axis=1), x_with_error.argmax(axis=1)
 
 
 #for k in range(1):

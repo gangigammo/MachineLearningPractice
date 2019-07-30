@@ -2,6 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import cvxpy as cv
+import os
 
 def st_ops(mu, q):
   x_proj = np.zeros(mu.shape)
@@ -43,8 +44,15 @@ for lam in lamall:
         xt = st_ops(xth, lam * 1 / L)
     w_history.append(xt.T)
 w_history = np.vstack(w_history)
+
+
 plt.plot(lamall,w_history[:, 0], label='w1')
 plt.plot(lamall,w_history[:, 1], label='w2')
+plt.legend()
+dirname = "figures/"
+os.makedirs(dirname, exist_ok=True)
+filename = dirname + "2-2.pdf"
+plt.savefig(filename)
 # plt.xlim(-1.5, 3)
 # plt.ylim(-1.5, 3)
 plt.show()

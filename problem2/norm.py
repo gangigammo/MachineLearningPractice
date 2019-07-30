@@ -2,20 +2,32 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import cvxpy as cv
-import st_func
-# proximal gradient
-def opt():
+import os
+
+def st_ops(mu, q):
+  x_proj = np.zeros(mu.shape)
+  for i in range(len(mu)):
+    if mu[i] >= q:
+      x_proj[i] = mu[i] - q
+    else:
+      if np.abs(mu[i]) < q:
+        x_proj[i] = 0
+      else:
+        x_proj[i] = mu[i] + q
+  return x_proj
+
+
+def seq(lam):
     x_1 = np.arange(-1.5, 3, 0.01)
     x_2 = np.arange(-1.5, 3, 0.02)
 
     X1, X2 = np.mgrid[-1.5:3:0.01, -1.5:3:0.02]
     fValue = np.zeros((len(x_1), len(x_2)))
 
-    A = np.array([[250, 15],
-                  [15, 4]])
+    A = np.array([[3, 0.5],
+                  [0.5, 1]])
     mu = np.array([[1],
                    [2]])
-    lam = 0.89
 
     for i in range(len(x_1)):
         for j in range(len(x_2)):
@@ -31,36 +43,28 @@ def opt():
     result = prob.solve(solver=cv.CVXOPT)
     w_lasso = w_lasso.value
 
+    # plt.contour(X1, X2, fValue) #勾配線
+
     x_init = np.array([[3],
                        [-1]])
-    xt = x_init
     L = 1.01 * np.max(np.linalg.eig(2 * A)[0])
-    eta0 = 300 / L
 
     x_history = []
-    fvalues = []
-    g_history = []
-    delta = 0.02
+    xt = x_init
     for t in range(100):
         x_history.append(xt.T)
         grad = 2 * np.dot(A, xt - mu)
-
-        g_history.append(grad.flatten().tolist())
-        ht = np.sqrt(np.sum(np.array(g_history) ** 2, axis=0).T) + delta
-        ht = ht.reshape(2, 1)
-
-        eta_t = eta0
-        xth = xt - eta_t * (ht ** -1 * grad)
-        ht_inv = ht ** -1
-        xt = np.array([st_func.st_ops(xth[0], lam * eta_t * ht_inv[0]),
-                       st_func.st_ops(xth[1], lam * eta_t * ht_inv[1])])
-
-        fv = np.dot(np.dot((xt - mu).T, A), (xt - mu)) + lam * (np.abs(xt[0]) + np.abs(xt[1]))
-        fvalues.append(fv)
+        xth = xt - 1 / L * grad
+        xt = st_ops(xth, lam * 1 / L)
 
     x_history = np.vstack(x_history)
-    fvalues = np.vstack(fvalues)
 
-    x_init = np.array([[3],
-                       [-1]])
-    return fvalues
+    tr = x_history.T
+    x1 = tr[0]
+    x2 = tr[1]
+    x1 -= x1[len(x1) - 1]
+    x2 -= x2[len(x1) - 1]
+    x3 = np.abs(x1) + np.abs(x2)
+    x3 = np.delete(x3, len(x3) - 1)
+    print(x3)
+    return x3
